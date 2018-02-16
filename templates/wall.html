@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Wall</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div id="message">
+        <form action="/add_message" method="post">
+            <h2>Coding Dojo Wall</h2>
+            <p>Welcome {{user_name}}</p>
+            <a href="/logoff">log out</a><br>
+            Enter Message: <br>
+            <textarea rows="4" cols="50" name="message_box" id="message_box"></textarea>
+            <br>
+            <input type="submit" value="Post Message"/>
+        </form>
+    </div>
+
+    <div id="message_list" action ="/wall">
+        {% for message in message_list %}
+            <h3>{{message['name']}} - {{message['created_at']}}</h3>
+            <p>{{message['message']}}</p>
+        {% for comment in comment_list %}
+            {%if comment['messages_id'] == message['id']%}
+                <h4 class="indent">{{comment['name']}} - {{comment['date']}}</h4>
+                <p class="indent">{{comment['comment']}}</p>
+            {% endif %}
+        {% endfor %}
+            <form action='/add_comment' method='post'>
+                Enter Comment: <br>
+                <textarea rows="4" cols="50" name="comment_box" id="comment_box"></textarea>
+                <br>
+                <input type="hidden" name="m_id" value="{{message['id']}}">
+                <input type="submit" value="Post Comment"/>
+            </form>
+            {% endfor %}
+    </div>  
+          
+</body>
+</html>
