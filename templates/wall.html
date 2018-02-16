@@ -24,12 +24,12 @@
         {% for message in message_list %}
             <h3>{{message['name']}} - {{message['created_at']}}</h3>
             <p>{{message['message']}}</p>
-        {% for comment in comment_list %}
-            {%if comment['messages_id'] == message['id']%}
-                <h4 class="indent">{{comment['name']}} - {{comment['date']}}</h4>
-                <p class="indent">{{comment['comment']}}</p>
-            {% endif %}
-        {% endfor %}
+                {% for comment in comment_list %}
+                    {%if comment['messages_id'] == message['id']%}
+                        <h4 class="indent">{{comment['name']}} - {{comment['date']}}</h4>
+                        <p class="indent">{{comment['comment']}}</p>
+                    {% endif %}
+                {% endfor %}
             <form action='/add_comment' method='post'>
                 Enter Comment: <br>
                 <textarea rows="4" cols="50" name="comment_box" id="comment_box"></textarea>
@@ -37,7 +37,7 @@
                 <input type="hidden" name="m_id" value="{{message['id']}}">
                 <input type="submit" value="Post Comment"/>
             </form>
-            {% endfor %}
+        {% endfor %}
     </div>  
           
 </body>

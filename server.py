@@ -84,8 +84,17 @@ def register():
         flash("Invalid Email!")
         return redirect('/')
     else: 
-        email = request.form['email']
-        count += 1
+        query ="SELECT * FROM users WHERE users.email = :email"
+        data = {
+                'email': request.form['email']
+            }
+        email = mysql.query_db(query, data)
+        if len(email) > 0: #if email has more than one inside list, it fails due to duplicates being added
+            flash("Email Already Exists")
+            return redirect('/')
+        else:
+            email = request.form['email']
+            count += 1
         # print "Got Info", email
 
     if len(request.form['password']) <8:
@@ -115,19 +124,22 @@ def register():
 
 @app.route('/wall')
 def user_wall():
-    user_id=session['user_id'][0]['id']
-    print user_id
-    query1 = "SELECT messages.id, messages.message,messages.created_at, CONCAT(users.first_name,' ', users.last_name) AS name FROM messages JOIN users ON users.id = messages.users_id"
-    query2 = "SELECT comments.messages_id, comments.id, comments.comment,DATE_FORMAT(comments.created_at, '%M %d %Y')as date,CONCAT(users.first_name,' ', users.last_name) AS name FROM comments JOIN users ON users.id = comments.users_id"
-    query3 = "SELECT CONCAT(users.first_name,' ', users.last_name) as name FROM users WHERE users.id = :user_id"
-    data = {
-        'user_id': user_id
-    }
-    user_message = mysql.query_db(query1)
-    user_comment = mysql.query_db(query2)
-    user_name = mysql.query_db(query3, data)
-    print user_name[0]['name']
-    return render_template('wall.html', message_list=user_message, comment_list=user_comment, user_name=user_name[0]['name'])
+    if 'user_id' not in session:
+        flash("Logged Out! Please Login Again!")
+        return redirect('/')
+    else:
+        user_id=session['user_id'][0]['id']
+        query1 = "SELECT messages.id, messages.message,messages.created_at, CONCAT(users.first_name,' ', users.last_name) AS name FROM messages JOIN users ON users.id = messages.users_id"
+        query2 = "SELECT comments.messages_id, comments.id, comments.comment,DATE_FORMAT(comments.created_at, '%M %d %Y')as date,CONCAT(users.first_name,' ', users.last_name) AS name FROM comments JOIN users ON users.id = comments.users_id"
+        query3 = "SELECT CONCAT(users.first_name,' ', users.last_name) as name FROM users WHERE users.id = :user_id"
+        data = {
+            'user_id': user_id
+        }
+        user_message = mysql.query_db(query1)
+        user_comment = mysql.query_db(query2)
+        user_name = mysql.query_db(query3, data)
+        print user_message
+        return render_template('wall.html', message_list=user_message, comment_list=user_comment, user_name=user_name[0]['name'])
 
 @app.route('/add_message', methods=['POST'])
 def add():
@@ -158,6 +170,7 @@ def insert():
 
 @app.route('/logoff')
 def logout():
+    session.clear()
     return redirect('/')
 
 app.run(debug=True)
